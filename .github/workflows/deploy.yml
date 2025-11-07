@@ -1,0 +1,90 @@
+name: CI/CD Terraform + S3 Frontend
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'part1_storage/**'
+      - 'part2_async/**'
+      - 'part3_api/**'
+      - 'part4_monitoring/**'
+      - 'deploy.sh'
+      - 'destroy.sh'
+      - 'frontend/**'
+
+jobs:
+  backend:
+    name: Backend Deploy
+    if: |
+      contains(github.event.head_commit.message, 'backend') ||
+      contains(join(github.event.commits.*.modified, ' '), 'part1_storage') ||
+      contains(join(github.event.commits.*.modified, ' '), 'part2_async') ||
+      contains(join(github.event.commits.*.modified, ' '), 'part3_api') ||
+      contains(join(github.event.commits.*.modified, ' '), 'part4_monitoring') ||
+      contains(join(github.event.commits.*.modified, ' '), 'deploy.sh') ||
+      contains(join(github.event.commits.*.modified, ' '), 'destroy.sh')
+    runs-on: ubuntu-latest
+    outputs:
+      images_bucket_name: ${{ steps.tf_out.outputs.images_bucket_name }}
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
+          aws-region: us-east-1
+
+      - name: Deploy new infra
+        run: bash deploy.sh
+
+      - name: Read images_bucket_name
+        id: tf_out
+        run: |
+          # Ensure terraform is initialized for the module and validate configuration
+          terraform -chdir=part1_storage init -input=false
+          terraform -chdir=part1_storage validate
+          BUCKET=$(terraform -chdir=part1_storage output -raw images_bucket_name)
+          echo "images_bucket_name=$BUCKET" >> "$GITHUB_OUTPUT"
+
+  frontend:
+    name: Frontend Deploy
+    needs: backend
+    runs-on: ubuntu-latest
+    env:
+      AWS_REGION: us-east-1
+      FRONTEND_BUCKET: ${{ needs.backend.outputs.images_bucket_name }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install
+        working-directory: frontend
+        run: npm ci
+
+      - name: Build
+        working-directory: frontend
+        run: npm run build
+
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
+          aws-region: us-east-1
+
+      - name: Upload to S3
+        run: |
+          if [ -z "${FRONTEND_BUCKET}" ]; then
+            echo "Bucket is empty" >&2; exit 1
+          fi
+          aws s3 sync frontend/dist "s3://${FRONTEND_BUCKET}" --delete
