@@ -9,8 +9,6 @@ export default function ImageUpload() {
   const [error, setError] = useState('');
   const [requestId, setRequestId] = useState<string | null>(null);
   const [results, setResults] = useState<PollResultsResponse | null>(null);
-  const [polling, setPolling] = useState(false);
-  const [pollAttempts, setPollAttempts] = useState(0);
   const [maxAttemptsReached, setMaxAttemptsReached] = useState(false);
   const [manualRetry, setManualRetry] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -62,7 +60,6 @@ export default function ImageUpload() {
       setRequestId(response.analysis_id);
       
       // Resetear contadores de polling
-      setPollAttempts(0);
       setMaxAttemptsReached(false);
       setManualRetry(false);
       
@@ -90,9 +87,7 @@ export default function ImageUpload() {
           clearTimeout(timeoutRef.current);
           timeoutRef.current = null;
         }
-        setPolling(false);
         setMaxAttemptsReached(false);
-        setPollAttempts(0);
         return { success: true, completed: true };
       }
       // Éxito pero aún procesando
@@ -112,8 +107,6 @@ export default function ImageUpload() {
       clearTimeout(timeoutRef.current);
     }
 
-    setPolling(true);
-    setPollAttempts(0);
     setMaxAttemptsReached(false);
     
     let pendingAttempts = 0; // Contador de intentos con estado pending/processing
@@ -130,7 +123,6 @@ export default function ImageUpload() {
       // Si no está completado, incrementar contador (tanto si hay error como si está pending)
       if (!result.completed) {
         pendingAttempts++;
-        setPollAttempts(pendingAttempts);
 
         if (pendingAttempts >= MAX_ATTEMPTS) {
           // Limpiar intervalos después de 3 intentos
@@ -142,7 +134,6 @@ export default function ImageUpload() {
             clearTimeout(timeoutRef.current);
             timeoutRef.current = null;
           }
-          setPolling(false);
           setMaxAttemptsReached(true);
           if (!result.success) {
             setError('No se pudieron obtener los resultados después de 3 intentos.');
@@ -159,7 +150,6 @@ export default function ImageUpload() {
         clearInterval(pollIntervalRef.current);
         pollIntervalRef.current = null;
       }
-      setPolling(false);
       setMaxAttemptsReached(true);
       setError('Tiempo de espera agotado. Por favor, intenta obtener los resultados manualmente más tarde.');
     }, 60000);
@@ -176,7 +166,6 @@ export default function ImageUpload() {
     if (result.completed) {
       // Resultado obtenido exitosamente
       setMaxAttemptsReached(false);
-      setPollAttempts(0);
       setManualRetry(false);
     } else if (result.success) {
       // Éxito pero aún procesando (pending/processing)
@@ -218,9 +207,7 @@ export default function ImageUpload() {
     setRequestId(null);
     setResults(null);
     setError('');
-    setPolling(false);
     setUploading(false);
-    setPollAttempts(0);
     setMaxAttemptsReached(false);
     setManualRetry(false);
     if (fileInputRef.current) {

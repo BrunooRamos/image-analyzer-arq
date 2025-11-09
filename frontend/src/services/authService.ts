@@ -21,7 +21,7 @@ export interface AuthUser {
  */
 export async function signUpUser({ username, password, email }: SignUpParams): Promise<{ requiresVerification: boolean }> {
   try {
-    const { isSignUpComplete, userId, nextStep } = await signUp({
+    const { isSignUpComplete, nextStep } = await signUp({
       username,
       password,
       options: {
@@ -115,7 +115,7 @@ export async function getCurrentAuthUser(): Promise<AuthUser | null> {
  */
 export async function confirmSignUpUser(username: string, confirmationCode: string): Promise<void> {
   try {
-    const { isSignUpComplete, nextStep } = await confirmSignUp({
+    const { isSignUpComplete } = await confirmSignUp({
       username,
       confirmationCode,
     });
