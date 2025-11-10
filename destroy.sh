@@ -14,6 +14,11 @@ ALARM_EMAIL="${ALARM_EMAIL:-}"   # opcional
 
 OPENAI_SECRET_NAME="${OPENAI_SECRET_NAME:-/img-analyzer/openai/api-key}"
 
+# Amplify (Paso 5) - para destroy
+GITHUB_REPOSITORY_URL="${GITHUB_REPOSITORY_URL:-}"
+GITHUB_ACCESS_TOKEN="${GITHUB_ACCESS_TOKEN:-}"
+AMPLIFY_BRANCH="${AMPLIFY_BRANCH:-main}"
+
 # ========================
 # UTILIDADES / DERIVADOS
 # ========================
@@ -63,39 +68,69 @@ echo "Bucket images:  ${IMAGES_BUCKET_NAME}"
 echo "DDB table:      ${ANALYSIS_TABLE_NAME}"
 echo "Secret ARN:     ${SECRET_ARN:-N/A}"
 echo "API ID:         ${API_ID:-N/A}"
+if [[ -n "${GITHUB_REPOSITORY_URL:-}" ]]; then
+  echo "GitHub Repo:    ${GITHUB_REPOSITORY_URL}"
+fi
 echo
 
 # ========================
-# 0) part5_amplify (si existe)
+# 0) part5_amplify (si existe y está desplegado)
 # ========================
 if [[ -d "${BASE_DIR}/part5_amplify" ]]; then
-  echo "==> Destroy part5_amplify ..."
-  terraform -chdir="${BASE_DIR}/part5_amplify" init -upgrade -input=false
-  # Intentar obtener outputs de part3_api si existen
-  API_ENDPOINT="$(terraform -chdir="${BASE_DIR}/part3_api" output -raw api_endpoint 2>/dev/null || echo "")"
-  COGNITO_USER_POOL_ID="$(terraform -chdir="${BASE_DIR}/part3_api" output -raw user_pool_id 2>/dev/null || echo "")"
-  COGNITO_CLIENT_ID="$(terraform -chdir="${BASE_DIR}/part3_api" output -raw user_pool_client_id 2>/dev/null || echo "")"
-  
-  # Si tenemos los outputs, usarlos; si no, usar placeholders
-  if [[ -n "${API_ENDPOINT:-}" && -n "${COGNITO_USER_POOL_ID:-}" && -n "${COGNITO_CLIENT_ID:-}" ]]; then
-    terraform -chdir="${BASE_DIR}/part5_amplify" destroy -auto-approve \
-      -var api_endpoint="${API_ENDPOINT}" \
-      -var cognito_user_pool_id="${COGNITO_USER_POOL_ID}" \
-      -var cognito_client_id="${COGNITO_CLIENT_ID}" \
-      -var github_repository_url="https://github.com/placeholder/repo" \
-      -var github_access_token="placeholder" \
-      -var branch_name="main"
-  else
-    echo "Advertencia: No se pudieron obtener outputs de part3_api. Intentando destroy con valores por defecto..."
-    terraform -chdir="${BASE_DIR}/part5_amplify" destroy -auto-approve \
-      -var api_endpoint="https://placeholder.execute-api.${REGION}.amazonaws.com" \
-      -var cognito_user_pool_id="us-east-1_PLACEHOLDER" \
-      -var cognito_client_id="PLACEHOLDER" \
-      -var github_repository_url="https://github.com/placeholder/repo" \
-      -var github_access_token="placeholder" \
-      -var branch_name="main"
+  # Verificar si hay un estado de Terraform (si fue desplegado)
+  # Verificar si existe terraform.tfstate o si hay recursos en el estado
+  HAS_STATE=false
+  if [[ -f "${BASE_DIR}/part5_amplify/terraform.tfstate" ]] || \
+     terraform -chdir="${BASE_DIR}/part5_amplify" state list >/dev/null 2>&1; then
+    HAS_STATE=true
   fi
-  echo
+  
+  if [[ "${HAS_STATE}" == "true" ]]; then
+    echo "==> Destroy part5_amplify ..."
+    terraform -chdir="${BASE_DIR}/part5_amplify" init -upgrade -input=false
+    
+    # Intentar obtener outputs de part3_api si existen
+    API_ENDPOINT="$(terraform -chdir="${BASE_DIR}/part3_api" output -raw api_endpoint 2>/dev/null || echo "")"
+    COGNITO_USER_POOL_ID="$(terraform -chdir="${BASE_DIR}/part3_api" output -raw user_pool_id 2>/dev/null || echo "")"
+    COGNITO_CLIENT_ID="$(terraform -chdir="${BASE_DIR}/part3_api" output -raw user_pool_client_id 2>/dev/null || echo "")"
+    
+    # Usar variables de entorno si están disponibles, sino usar outputs, sino placeholders
+    if [[ -n "${GITHUB_REPOSITORY_URL:-}" ]]; then
+      REPO_URL="${GITHUB_REPOSITORY_URL}"
+    else
+      REPO_URL="https://github.com/placeholder/repo"
+    fi
+    
+    if [[ -n "${GITHUB_ACCESS_TOKEN:-}" ]]; then
+      TOKEN="${GITHUB_ACCESS_TOKEN}"
+    else
+      TOKEN="placeholder"
+    fi
+    
+    # Si tenemos los outputs de part3_api, usarlos; si no, usar placeholders
+    if [[ -n "${API_ENDPOINT:-}" && -n "${COGNITO_USER_POOL_ID:-}" && -n "${COGNITO_CLIENT_ID:-}" ]]; then
+      terraform -chdir="${BASE_DIR}/part5_amplify" destroy -auto-approve \
+        -var api_endpoint="${API_ENDPOINT}" \
+        -var cognito_user_pool_id="${COGNITO_USER_POOL_ID}" \
+        -var cognito_client_id="${COGNITO_CLIENT_ID}" \
+        -var github_repository_url="${REPO_URL}" \
+        -var github_access_token="${TOKEN}" \
+        -var branch_name="${AMPLIFY_BRANCH}"
+    else
+      echo "Advertencia: No se pudieron obtener outputs de part3_api. Usando valores por defecto..."
+      terraform -chdir="${BASE_DIR}/part5_amplify" destroy -auto-approve \
+        -var api_endpoint="https://placeholder.execute-api.${REGION}.amazonaws.com" \
+        -var cognito_user_pool_id="us-east-1_PLACEHOLDER" \
+        -var cognito_client_id="PLACEHOLDER" \
+        -var github_repository_url="${REPO_URL}" \
+        -var github_access_token="${TOKEN}" \
+        -var branch_name="${AMPLIFY_BRANCH}"
+    fi
+    echo
+  else
+    echo "==> Saltando part5_amplify (no hay recursos desplegados o no hay estado de Terraform)"
+    echo
+  fi
 else
   echo "==> Saltando part5_amplify (directorio no existe)"
   echo

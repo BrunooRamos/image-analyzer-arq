@@ -20,7 +20,7 @@ variable "github_repository_url" {
 }
 
 variable "github_access_token" {
-  description = "Token de acceso de GitHub para conectar Amplify con el repositorio"
+  description = "Token de acceso de GitHub para conectar Amplify con el repositorio. REQUERIDO incluso para repos públicos cuando se usa Terraform. Para repos públicos, puedes crear un token con permisos mínimos (solo lectura pública)."
   type        = string
   sensitive   = true
 }
@@ -32,7 +32,7 @@ variable "branch_name" {
 }
 
 variable "app_root" {
-  description = "Directorio raíz de la aplicación en el monorepo (default: frontend)"
+  description = "Directorio raíz de la aplicación frontend en el monorepo (default: frontend). Este es el directorio donde está el frontend dentro del repositorio."
   type        = string
   default     = "frontend"
 }

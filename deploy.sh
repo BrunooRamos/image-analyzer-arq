@@ -99,26 +99,39 @@ echo "Cognito Client ID:    ${COGNITO_CLIENT_ID}"
 echo
 
 # ========================
-# PASO C: part5_amplify (opcional si están configuradas las variables de GitHub)
+# PASO C: part5_amplify (opcional si está configurada la URL del repo de GitHub)
 # ========================
-if [[ -n "${GITHUB_REPOSITORY_URL:-}" && -n "${GITHUB_ACCESS_TOKEN:-}" ]]; then
-  echo "==> Applying part5_amplify ..."
-  terraform -chdir="${BASE_DIR}/part5_amplify" init -upgrade -input=false
-  terraform -chdir="${BASE_DIR}/part5_amplify" apply -auto-approve \
-    -var api_endpoint="${API_ENDPOINT}" \
-    -var cognito_user_pool_id="${COGNITO_USER_POOL_ID}" \
-    -var cognito_client_id="${COGNITO_CLIENT_ID}" \
-    -var github_repository_url="${GITHUB_REPOSITORY_URL}" \
-    -var github_access_token="${GITHUB_ACCESS_TOKEN}" \
-    -var branch_name="${AMPLIFY_BRANCH}"
+if [[ -n "${GITHUB_REPOSITORY_URL:-}" ]]; then
+  if [[ -z "${GITHUB_ACCESS_TOKEN:-}" ]]; then
+    echo "⚠️  ADVERTENCIA: GITHUB_ACCESS_TOKEN no está configurado."
+    echo "AWS Amplify requiere un token incluso para repos públicos cuando se usa Terraform."
+    echo "Para repos públicos, crea un token con permisos mínimos:"
+    echo "  1. GitHub → Settings → Developer settings → Personal access tokens → Tokens (classic)"
+    echo "  2. Generate new token (classic)"
+    echo "  3. Selecciona solo 'public_repo' scope (para repos públicos)"
+    echo "  4. Copia el token y ejecuta: export GITHUB_ACCESS_TOKEN='tu_token'"
+    echo ""
+    echo "Saltando part5_amplify..."
+    echo
+  else
+    echo "==> Applying part5_amplify ..."
+    terraform -chdir="${BASE_DIR}/part5_amplify" init -upgrade -input=false
+    terraform -chdir="${BASE_DIR}/part5_amplify" apply -auto-approve \
+      -var api_endpoint="${API_ENDPOINT}" \
+      -var cognito_user_pool_id="${COGNITO_USER_POOL_ID}" \
+      -var cognito_client_id="${COGNITO_CLIENT_ID}" \
+      -var github_repository_url="${GITHUB_REPOSITORY_URL}" \
+      -var github_access_token="${GITHUB_ACCESS_TOKEN}" \
+      -var branch_name="${AMPLIFY_BRANCH}"
 
-  AMPLIFY_URL="$(terraform -chdir="${BASE_DIR}/part5_amplify" output -raw amplify_app_url 2>/dev/null || true)"
-  AMPLIFY_CONSOLE_URL="$(terraform -chdir="${BASE_DIR}/part5_amplify" output -raw amplify_console_url 2>/dev/null || true)"
-  echo "Amplify App URL:     ${AMPLIFY_URL:-N/A}"
-  echo "Amplify Console:     ${AMPLIFY_CONSOLE_URL:-N/A}"
-  echo
+    AMPLIFY_URL="$(terraform -chdir="${BASE_DIR}/part5_amplify" output -raw amplify_app_url 2>/dev/null || true)"
+    AMPLIFY_CONSOLE_URL="$(terraform -chdir="${BASE_DIR}/part5_amplify" output -raw amplify_console_url 2>/dev/null || true)"
+    echo "Amplify App URL:     ${AMPLIFY_URL:-N/A}"
+    echo "Amplify Console:     ${AMPLIFY_CONSOLE_URL:-N/A}"
+    echo
+  fi
 else
-  echo "==> Saltando part5_amplify (GITHUB_REPOSITORY_URL o GITHUB_ACCESS_TOKEN no configurados)"
+  echo "==> Saltando part5_amplify (GITHUB_REPOSITORY_URL no configurado)"
   echo
 fi
 

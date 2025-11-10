@@ -16,9 +16,13 @@ resource "aws_amplify_app" "this" {
   repository = var.github_repository_url
 
   # Configuración del repositorio GitHub
+  # NOTA: AWS Amplify requiere un token incluso para repos públicos cuando se usa Terraform
+  # Para repos públicos, puedes usar un token con permisos mínimos (solo lectura pública)
   access_token = var.github_access_token
 
-  # Configuración de build
+  # Configuración de build para monorepo
+  # El frontend está en la carpeta /frontend del repositorio
+  # Con appRoot: frontend, Amplify automáticamente cambia al directorio /frontend antes de ejecutar comandos
   # Amplify detectará automáticamente el amplify.yml en la raíz del repo
   # Si no está presente, usar este build_spec inline como respaldo:
   build_spec = <<-BUILDSPEC
@@ -40,9 +44,14 @@ applications:
       cache:
         paths:
           - node_modules/**/*
+    rewrites:
+      - source: '/<*>'
+        target: '/index.html'
+        status: '200'
 BUILDSPEC
 
-  # Configuración de redirecciones para SPA (React Router)
+  # Configuración de redirecciones para SPA (React Router) - respaldo si build_spec no se usa
+  # Nota: Los rewrites en amplify.yml/build_spec tienen prioridad sobre custom_rule
   custom_rule {
     source = "/<*>"
     target = "/index.html"
@@ -50,6 +59,7 @@ BUILDSPEC
   }
 
   # Variables de entorno a nivel de app (compartidas)
+  # AMPLIFY_MONOREPO_APP_ROOT indica a Amplify que es un monorepo con el frontend en /frontend
   environment_variables = {
     AMPLIFY_DIFF_DEPLOY     = "false"
     AMPLIFY_MONOREPO_APP_ROOT = var.app_root
