@@ -29,10 +29,17 @@ export interface UploadImageResponse {
 }
 
 export interface PollResultsResponse {
-  requestId: string;
-  status: 'pending' | 'processing' | 'completed' | 'failed';
-  isAIGenerated: boolean | null;
-  confidence?: number;
+  analysis_id?: string;
+  requestId?: string;
+  status: 'pending' | 'processing' | 'completed' | 'failed' | 'done' | 'DONE';
+  isAIGenerated?: boolean | null;
+  result?: 'AI' | 'REAL' | string;
+  confidence?: number | string;
+  explanation?: string;
+  provider?: string;
+  key?: string;
+  created_at?: string;
+  updated_at?: string;
   message?: string;
 }
 
@@ -100,8 +107,30 @@ export async function pollResults(analysisId: string): Promise<PollResultsRespon
     // Normalizar status (el backend puede devolver en MAYÚSCULAS)
     const data = response.data;
     if (data && typeof data.status === 'string') {
-      data.status = data.status.toLowerCase();
+      const statusLower = data.status.toLowerCase();
+      // Mapear "done" a "completed" para compatibilidad
+      if (statusLower === 'done') {
+        data.status = 'completed';
+      } else {
+        data.status = statusLower;
+      }
     }
+    
+    // Mapear result a isAIGenerated para compatibilidad con componentes existentes
+    if (data.result && !data.isAIGenerated) {
+      data.isAIGenerated = data.result === 'AI' || data.result.toLowerCase() === 'ai';
+    }
+    
+    // Convertir confidence de string a number si es necesario
+    if (data.confidence && typeof data.confidence === 'string') {
+      data.confidence = parseFloat(data.confidence);
+    }
+    
+    // Asegurar requestId para compatibilidad
+    if (!data.requestId && data.analysis_id) {
+      data.requestId = data.analysis_id;
+    }
+    
     return data;
   } catch (error: any) {
     console.error('Error obteniendo resultados:', error);
