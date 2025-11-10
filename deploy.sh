@@ -14,6 +14,11 @@ OPENAI_SECRET_NAME="${OPENAI_SECRET_NAME:-/img-analyzer/openai/api-key}"
 COGNITO_DOMAIN_PREFIX="${COGNITO_DOMAIN_PREFIX:-img-analyzer-dev-tualias}"  # Único en la región
 ALARM_EMAIL="${ALARM_EMAIL:-}"  # opcional (puede quedar vacío)
 
+# Amplify (Paso 5)
+GITHUB_REPOSITORY_URL="${GITHUB_REPOSITORY_URL:-}"  # ej: https://github.com/owner/repo
+GITHUB_ACCESS_TOKEN="${GITHUB_ACCESS_TOKEN:-}"       # Token de acceso de GitHub
+AMPLIFY_BRANCH="${AMPLIFY_BRANCH:-main}"            # Branch a desplegar
+
 # ========================
 # UTILIDADES / DERIVADOS
 # ========================
@@ -86,8 +91,39 @@ echo "API endpoint: ${API_ENDPOINT}"
 echo "API ID:       ${API_ID}"
 echo
 
+# Obtener outputs de Cognito para Amplify
+COGNITO_USER_POOL_ID="$(terraform -chdir="${BASE_DIR}/part3_api" output -raw user_pool_id)"
+COGNITO_CLIENT_ID="$(terraform -chdir="${BASE_DIR}/part3_api" output -raw user_pool_client_id)"
+echo "Cognito User Pool ID: ${COGNITO_USER_POOL_ID}"
+echo "Cognito Client ID:    ${COGNITO_CLIENT_ID}"
+echo
+
 # ========================
-# PASO C: part4_monitoring
+# PASO C: part5_amplify (opcional si están configuradas las variables de GitHub)
+# ========================
+if [[ -n "${GITHUB_REPOSITORY_URL:-}" && -n "${GITHUB_ACCESS_TOKEN:-}" ]]; then
+  echo "==> Applying part5_amplify ..."
+  terraform -chdir="${BASE_DIR}/part5_amplify" init -upgrade -input=false
+  terraform -chdir="${BASE_DIR}/part5_amplify" apply -auto-approve \
+    -var api_endpoint="${API_ENDPOINT}" \
+    -var cognito_user_pool_id="${COGNITO_USER_POOL_ID}" \
+    -var cognito_client_id="${COGNITO_CLIENT_ID}" \
+    -var github_repository_url="${GITHUB_REPOSITORY_URL}" \
+    -var github_access_token="${GITHUB_ACCESS_TOKEN}" \
+    -var branch_name="${AMPLIFY_BRANCH}"
+
+  AMPLIFY_URL="$(terraform -chdir="${BASE_DIR}/part5_amplify" output -raw amplify_app_url 2>/dev/null || true)"
+  AMPLIFY_CONSOLE_URL="$(terraform -chdir="${BASE_DIR}/part5_amplify" output -raw amplify_console_url 2>/dev/null || true)"
+  echo "Amplify App URL:     ${AMPLIFY_URL:-N/A}"
+  echo "Amplify Console:     ${AMPLIFY_CONSOLE_URL:-N/A}"
+  echo
+else
+  echo "==> Saltando part5_amplify (GITHUB_REPOSITORY_URL o GITHUB_ACCESS_TOKEN no configurados)"
+  echo
+fi
+
+# ========================
+# PASO D: part4_monitoring
 # ========================
 echo "==> Applying part4_monitoring ..."
 terraform -chdir="${BASE_DIR}/part4_monitoring" init -upgrade -input=false
@@ -101,5 +137,8 @@ echo "✅ Deploy completo"
 echo "API endpoint: ${API_ENDPOINT}"
 echo "API ID:       ${API_ID}"
 echo "Dashboard:    CloudWatch → Dashboards → ${PROJECT_NAME}-${ENV}-dashboard"
+if [[ -n "${AMPLIFY_URL:-}" ]]; then
+  echo "Amplify App:   ${AMPLIFY_URL}"
+fi
 echo "Si suscribiste email a SNS, recordá confirmar el mail."
 

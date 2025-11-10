@@ -66,6 +66,42 @@ echo "API ID:         ${API_ID:-N/A}"
 echo
 
 # ========================
+# 0) part5_amplify (si existe)
+# ========================
+if [[ -d "${BASE_DIR}/part5_amplify" ]]; then
+  echo "==> Destroy part5_amplify ..."
+  terraform -chdir="${BASE_DIR}/part5_amplify" init -upgrade -input=false
+  # Intentar obtener outputs de part3_api si existen
+  API_ENDPOINT="$(terraform -chdir="${BASE_DIR}/part3_api" output -raw api_endpoint 2>/dev/null || echo "")"
+  COGNITO_USER_POOL_ID="$(terraform -chdir="${BASE_DIR}/part3_api" output -raw user_pool_id 2>/dev/null || echo "")"
+  COGNITO_CLIENT_ID="$(terraform -chdir="${BASE_DIR}/part3_api" output -raw user_pool_client_id 2>/dev/null || echo "")"
+  
+  # Si tenemos los outputs, usarlos; si no, usar placeholders
+  if [[ -n "${API_ENDPOINT:-}" && -n "${COGNITO_USER_POOL_ID:-}" && -n "${COGNITO_CLIENT_ID:-}" ]]; then
+    terraform -chdir="${BASE_DIR}/part5_amplify" destroy -auto-approve \
+      -var api_endpoint="${API_ENDPOINT}" \
+      -var cognito_user_pool_id="${COGNITO_USER_POOL_ID}" \
+      -var cognito_client_id="${COGNITO_CLIENT_ID}" \
+      -var github_repository_url="https://github.com/placeholder/repo" \
+      -var github_access_token="placeholder" \
+      -var branch_name="main"
+  else
+    echo "Advertencia: No se pudieron obtener outputs de part3_api. Intentando destroy con valores por defecto..."
+    terraform -chdir="${BASE_DIR}/part5_amplify" destroy -auto-approve \
+      -var api_endpoint="https://placeholder.execute-api.${REGION}.amazonaws.com" \
+      -var cognito_user_pool_id="us-east-1_PLACEHOLDER" \
+      -var cognito_client_id="PLACEHOLDER" \
+      -var github_repository_url="https://github.com/placeholder/repo" \
+      -var github_access_token="placeholder" \
+      -var branch_name="main"
+  fi
+  echo
+else
+  echo "==> Saltando part5_amplify (directorio no existe)"
+  echo
+fi
+
+# ========================
 # 1) part4_monitoring
 # ========================
 if [[ -n "${API_ID:-}" && "${API_ID}" != "None" ]]; then

@@ -29,8 +29,8 @@ export ENV=dev
 export REGION=us-east-1
 export ROLE_NAME=LabRole
 export OPENAI_SECRET_NAME=/img-analyzer/openai/api-key
-export COGNITO_DOMAIN_PREFIX=img-analyzer-dev-miusuario
-export ALARM_EMAIL="mi.email@example.com" # opcional
+export COGNITO_DOMAIN_PREFIX=img-analyzer-dev-tualias
+export ALARM_EMAIL="bramos2@correo.um.edu.uy" # opcional
 ```
 
 ## Despliegue
