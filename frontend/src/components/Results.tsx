@@ -6,9 +6,10 @@ interface ResultsProps {
   onManualRetry?: () => void;
   manualRetryLoading?: boolean;
   showManualRetry?: boolean;
+  onReset?: () => void;
 }
 
-export default function Results({ results, imagePreview, onManualRetry, manualRetryLoading, showManualRetry }: ResultsProps) {
+export default function Results({ results, imagePreview, onManualRetry, manualRetryLoading, showManualRetry, onReset }: ResultsProps) {
   // Normalizar status
   const normalizedStatus = (results.status as unknown as string)?.toString().toLowerCase() as
     | 'pending'
@@ -49,15 +50,6 @@ export default function Results({ results, imagePreview, onManualRetry, manualRe
     return '⏳';
   };
 
-  const getResultColor = () => {
-    if (normalizedStatus === 'completed') {
-      return isAI 
-        ? '#dc2626' 
-        : '#16a34a';
-    }
-    return '#154d82';
-  };
-
   const getResultText = () => {
     if (normalizedStatus === 'completed') {
       return isAI ? 'Generada por IA' : 'Imagen Real';
@@ -67,19 +59,13 @@ export default function Results({ results, imagePreview, onManualRetry, manualRe
     return 'Pendiente';
   };
 
-  const getConfidenceColor = () => {
-    if (confidenceValue >= 0.8) return 'text-red-600';
-    if (confidenceValue >= 0.6) return 'text-orange-600';
-    return 'text-yellow-600';
-  };
-
   return (
-    <div className="mt-4">
+    <div className="mt-0">
       {/* Layout de 2 columnas: Imagen a la izquierda, Resultados a la derecha */}
-      <div className={`grid gap-6 ${imagePreview ? 'grid-cols-1 lg:grid-cols-2' : 'grid-cols-1'}`}>
+      <div className={`grid gap-6 ${imagePreview ? 'grid-cols-1 lg:grid-cols-[1fr_1.2fr]' : 'grid-cols-1'}`}>
         {/* Columna izquierda: Imagen */}
         {imagePreview && (
-          <div className="flex items-center justify-center">
+          <div className="flex flex-col items-center justify-center gap-4">
             <div className="w-full bg-white rounded-xl shadow-lg p-4" style={{ maxHeight: '600px' }}>
               <img
                 src={imagePreview}
@@ -88,31 +74,49 @@ export default function Results({ results, imagePreview, onManualRetry, manualRe
                 style={{ maxHeight: '592px' }}
               />
             </div>
+            {onReset && (
+              <button
+                onClick={onReset}
+                className="px-8 py-3 rounded-lg font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 transition-all transform hover:scale-105 shadow-lg"
+                style={{ 
+                  backgroundColor: '#071d32',
+                  color: 'white'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = '#154d82';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = '#071d32';
+                }}
+              >
+                Analizar Otra Imagen
+              </button>
+            )}
           </div>
         )}
 
         {/* Columna derecha: Resultados */}
-        <div className="flex flex-col">
+        <div className="flex flex-col min-w-0">
           {/* Header con estado */}
           <div 
-            className="rounded-t-xl p-4 mb-4"
-            style={{ backgroundColor: getResultColor() }}
+            className="rounded-t-lg p-4 mb-0"
+            style={{ backgroundColor: '#071d32' }}
           >
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="text-4xl">{getResultEmoji()}</div>
+                <div className="text-3xl">{getResultEmoji()}</div>
                 <div>
-                  <h2 className="text-2xl font-bold text-white">
+                  <h2 className="text-xl font-bold text-white">
                     {getResultText()}
                   </h2>
                   {normalizedStatus === 'completed' && (
-                    <p className="text-white/90 text-xs mt-1">
+                    <p className="text-white/80 text-xs mt-0.5">
                       Análisis completado
                     </p>
                   )}
                 </div>
               </div>
-              <div className="bg-white/20 backdrop-blur-md rounded-full px-3 py-1">
+              <div className="bg-white/20 rounded-full px-3 py-1">
                 <span className="text-white font-semibold text-xs">
                   {normalizedStatus === 'completed' ? '✓ Listo' : '⏳ En proceso'}
                 </span>
@@ -121,7 +125,7 @@ export default function Results({ results, imagePreview, onManualRetry, manualRe
           </div>
 
           {/* Contenido de resultados */}
-          <div className="bg-white rounded-b-xl shadow-lg p-6" style={{ maxHeight: '520px', overflowY: 'auto' }}>
+          <div className="bg-white rounded-b-lg shadow-lg p-6" style={{ maxHeight: '520px', overflowY: 'auto' }}>
 
             {/* Botón manual retry */}
             {(normalizedStatus === 'pending' || normalizedStatus === 'processing') && onManualRetry && showManualRetry && (
@@ -146,16 +150,16 @@ export default function Results({ results, imagePreview, onManualRetry, manualRe
               <div className="space-y-4">
                 {/* Card de resultado principal */}
                 <div 
-                  className="rounded-lg p-4 border-2"
+                  className="rounded-lg p-4 border"
                   style={{ 
-                    backgroundColor: isAI ? '#fef2f2' : '#f0fdf4',
-                    borderColor: isAI ? '#fecaca' : '#bbf7d0'
+                    backgroundColor: '#f8fafc',
+                    borderColor: '#e2e8f0'
                   }}
                 >
                   <div className="flex items-center gap-3 mb-3">
-                    <span className="text-3xl">{isAI ? '🤖' : '✨'}</span>
+                    <span className="text-2xl">{isAI ? '🤖' : '✨'}</span>
                     <div>
-                      <h3 className="text-xl font-bold text-gray-800">
+                      <h3 className="text-lg font-bold" style={{ color: '#071d32' }}>
                         {isAI ? 'Imagen Generada por IA' : 'Imagen Real'}
                       </h3>
                       <p className="text-xs text-gray-600 mt-0.5">
@@ -169,7 +173,7 @@ export default function Results({ results, imagePreview, onManualRetry, manualRe
                     <div className="mt-3">
                       <div className="flex items-center justify-between mb-1.5">
                         <span className="text-xs font-semibold text-gray-700">Nivel de Confianza</span>
-                        <span className={`text-base font-bold ${getConfidenceColor()}`}>
+                        <span className="text-base font-bold" style={{ color: '#154d82' }}>
                           {(confidenceValue * 100).toFixed(1)}%
                         </span>
                       </div>
@@ -189,18 +193,18 @@ export default function Results({ results, imagePreview, onManualRetry, manualRe
                 {/* Explicación */}
                 {results.explanation && (
                   <div 
-                    className="rounded-lg p-4 border-2"
+                    className="rounded-lg p-4 border"
                     style={{ 
-                      backgroundColor: '#f0f9ff',
-                      borderColor: '#154d82'
+                      backgroundColor: '#f8fafc',
+                      borderColor: '#e2e8f0'
                     }}
                   >
                     <div className="flex items-start gap-2">
-                      <span className="text-2xl">💡</span>
+                      <span className="text-xl">💡</span>
                       <div className="flex-1">
-                        <h4 className="text-base font-bold text-gray-800 mb-1">Explicación del Análisis</h4>
-                        <p className="text-gray-700 text-sm leading-relaxed italic">
-                          "{results.explanation}"
+                        <h4 className="text-sm font-bold mb-1" style={{ color: '#071d32' }}>Explicación del Análisis</h4>
+                        <p className="text-gray-700 text-sm leading-relaxed">
+                          {results.explanation}
                         </p>
                       </div>
                     </div>
@@ -214,12 +218,12 @@ export default function Results({ results, imagePreview, onManualRetry, manualRe
                     <div 
                       className="rounded-lg p-3 border"
                       style={{ 
-                        backgroundColor: '#f0f9ff',
-                        borderColor: '#154d82'
+                        backgroundColor: '#f8fafc',
+                        borderColor: '#e2e8f0'
                       }}
                     >
                       <div className="flex items-center gap-1.5 mb-1">
-                        <span className="text-xl">🔬</span>
+                        <span className="text-lg">🔬</span>
                         <span className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Proveedor</span>
                       </div>
                       <p className="text-gray-800 font-medium text-xs">{results.provider}</p>
@@ -232,11 +236,11 @@ export default function Results({ results, imagePreview, onManualRetry, manualRe
                       className="rounded-lg p-3 border"
                       style={{ 
                         backgroundColor: '#f8fafc',
-                        borderColor: '#cbd5e1'
+                        borderColor: '#e2e8f0'
                       }}
                     >
                       <div className="flex items-center gap-1.5 mb-1">
-                        <span className="text-xl">🆔</span>
+                        <span className="text-lg">🆔</span>
                         <span className="text-xs font-semibold text-gray-600 uppercase tracking-wide">ID</span>
                       </div>
                       <p className="text-gray-800 font-mono text-xs break-all">{results.analysis_id}</p>
@@ -248,12 +252,12 @@ export default function Results({ results, imagePreview, onManualRetry, manualRe
                     <div 
                       className="rounded-lg p-3 border"
                       style={{ 
-                        backgroundColor: '#fffbeb',
-                        borderColor: '#fde68a'
+                        backgroundColor: '#f8fafc',
+                        borderColor: '#e2e8f0'
                       }}
                     >
                       <div className="flex items-center gap-1.5 mb-1">
-                        <span className="text-xl">📅</span>
+                        <span className="text-lg">📅</span>
                         <span className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Creado</span>
                       </div>
                       <p className="text-gray-800 text-xs">{formatDate(results.created_at)}</p>
@@ -265,12 +269,12 @@ export default function Results({ results, imagePreview, onManualRetry, manualRe
                     <div 
                       className="rounded-lg p-3 border"
                       style={{ 
-                        backgroundColor: '#f0fdfa',
-                        borderColor: '#99f6e4'
+                        backgroundColor: '#f8fafc',
+                        borderColor: '#e2e8f0'
                       }}
                     >
                       <div className="flex items-center gap-1.5 mb-1">
-                        <span className="text-xl">🕒</span>
+                        <span className="text-lg">🕒</span>
                         <span className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Actualizado</span>
                       </div>
                       <p className="text-gray-800 text-xs">{formatDate(results.updated_at)}</p>
@@ -326,11 +330,11 @@ export default function Results({ results, imagePreview, onManualRetry, manualRe
               <div 
                 className="mt-4 rounded-lg p-3 border"
                 style={{ 
-                  backgroundColor: '#f0f9ff',
-                  borderColor: '#154d82'
+                  backgroundColor: '#f8fafc',
+                  borderColor: '#e2e8f0'
                 }}
               >
-                <p className="text-sm flex items-center gap-2" style={{ color: '#154d82' }}>
+                <p className="text-sm flex items-center gap-2 text-gray-700">
                   <span>ℹ️</span>
                   {results.message}
                 </p>

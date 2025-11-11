@@ -217,11 +217,8 @@ export default function ImageUpload() {
 
   return (
     <div className="min-h-screen py-12 px-4" style={{ backgroundColor: '#071d32' }}>
-      <div className="max-w-4xl mx-auto">
+      <div className="max-w-7xl mx-auto">
         <div className="bg-white rounded-lg shadow-xl p-8">
-          <h1 className="text-3xl font-bold mb-8 text-center" style={{ color: '#071d32' }}>
-            Image Analyzer
-          </h1>
 
           {error && (
             <div className={`mb-6 p-4 rounded-lg ${
@@ -348,6 +345,7 @@ export default function ImageUpload() {
                   onManualRetry={handleManualRetry}
                   manualRetryLoading={manualRetry}
                   showManualRetry={maxAttemptsReached}
+                  onReset={handleReset}
                 />
               ) : (
                 <Results 
@@ -360,26 +358,9 @@ export default function ImageUpload() {
                   onManualRetry={handleManualRetry}
                   manualRetryLoading={manualRetry}
                   showManualRetry={maxAttemptsReached}
+                  onReset={handleReset}
                 />
               )}
-              <div className="mt-4 flex justify-center">
-                <button
-                  onClick={handleReset}
-                  className="px-8 py-3 rounded-lg font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 transition-all transform hover:scale-105 shadow-lg"
-                  style={{ 
-                    backgroundColor: '#071d32',
-                    color: 'white'
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = '#154d82';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = '#071d32';
-                  }}
-                >
-                  Analizar Otra Imagen
-                </button>
-              </div>
             </>
           )}
         </div>
