@@ -57,10 +57,10 @@ export default function Register() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 px-4">
+    <div className="min-h-screen flex items-center justify-center px-4" style={{ backgroundColor: '#071d32' }}>
       <div className="max-w-md w-full bg-white rounded-lg shadow-xl p-8">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">AI Image Detector</h1>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Image Analyzer</h1>
           <p className="text-gray-600">Crea una nueva cuenta</p>
         </div>
 
@@ -82,7 +82,7 @@ export default function Register() {
               onChange={(e) => setUsername(e.target.value)}
               required
               minLength={3}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-secondary focus:border-transparent"
               placeholder="nombreusuario"
             />
           </div>
@@ -97,7 +97,7 @@ export default function Register() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-secondary focus:border-transparent"
               placeholder="tu@email.com"
             />
           </div>
@@ -113,7 +113,7 @@ export default function Register() {
               onChange={(e) => setPassword(e.target.value)}
               required
               minLength={8}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-secondary focus:border-transparent"
               placeholder="Mínimo 8 caracteres"
             />
           </div>
@@ -129,7 +129,7 @@ export default function Register() {
               onChange={(e) => setConfirmPassword(e.target.value)}
               required
               minLength={8}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-secondary focus:border-transparent"
               placeholder="Confirma tu contraseña"
             />
           </div>
@@ -137,7 +137,7 @@ export default function Register() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-indigo-600 text-white py-2 px-4 rounded-lg font-medium hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="w-full bg-[#071d32] hover:bg-[#154d82] text-white py-2 px-4 rounded-lg font-medium focus:outline-none focus:ring-2 focus:ring-[#154d82] focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             {loading ? 'Registrando...' : 'Registrarse'}
           </button>
@@ -145,7 +145,7 @@ export default function Register() {
 
         <p className="mt-6 text-center text-sm text-gray-600">
           ¿Ya tienes una cuenta?{' '}
-          <Link to="/login" className="text-indigo-600 hover:text-indigo-500 font-medium">
+          <Link to="/login" className="text-secondary hover:text-primary font-medium">
             Inicia sesión aquí
           </Link>
         </p>

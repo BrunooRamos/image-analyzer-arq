@@ -52,10 +52,10 @@ export default function Results({ results, imagePreview, onManualRetry, manualRe
   const getResultColor = () => {
     if (normalizedStatus === 'completed') {
       return isAI 
-        ? 'from-red-500 via-pink-500 to-rose-500' 
-        : 'from-green-500 via-emerald-500 to-teal-500';
+        ? '#dc2626' 
+        : '#16a34a';
     }
-    return 'from-blue-500 via-cyan-500 to-blue-400';
+    return '#154d82';
   };
 
   const getResultText = () => {
@@ -74,204 +74,269 @@ export default function Results({ results, imagePreview, onManualRetry, manualRe
   };
 
   return (
-    <div className="mt-8">
-      {/* Card principal con gradiente */}
-      <div className={`bg-gradient-to-br ${getResultColor()} rounded-2xl shadow-2xl overflow-hidden transform transition-all duration-300 hover:scale-[1.01]`}>
-        {/* Header con emoji grande */}
-        <div className="bg-white/10 backdrop-blur-sm p-6">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <div className="text-6xl animate-bounce">{getResultEmoji()}</div>
-              <div>
-                <h2 className="text-3xl font-bold text-white drop-shadow-lg">
-                  {getResultText()}
-                </h2>
-                {normalizedStatus === 'completed' && (
-                  <p className="text-white/90 text-sm mt-1">
-                    Análisis completado
-                  </p>
-                )}
-              </div>
-            </div>
-            <div className="bg-white/20 backdrop-blur-md rounded-full px-4 py-2">
-              <span className="text-white font-semibold text-sm">
-                {normalizedStatus === 'completed' ? '✓ Listo' : '⏳ En proceso'}
-              </span>
+    <div className="mt-4">
+      {/* Layout de 2 columnas: Imagen a la izquierda, Resultados a la derecha */}
+      <div className={`grid gap-6 ${imagePreview ? 'grid-cols-1 lg:grid-cols-2' : 'grid-cols-1'}`}>
+        {/* Columna izquierda: Imagen */}
+        {imagePreview && (
+          <div className="flex items-center justify-center">
+            <div className="w-full bg-white rounded-xl shadow-lg p-4" style={{ maxHeight: '600px' }}>
+              <img
+                src={imagePreview}
+                alt="Imagen analizada"
+                className="w-full h-full object-contain rounded-lg"
+                style={{ maxHeight: '592px' }}
+              />
             </div>
           </div>
-        </div>
+        )}
 
-        {/* Contenido principal */}
-        <div className="bg-white p-8">
-          {/* Imagen destacada */}
-          {imagePreview && (
-            <div className="mb-8 relative group">
-              <div className="absolute inset-0 bg-gradient-to-r from-purple-400 to-pink-400 rounded-2xl blur-xl opacity-30 group-hover:opacity-50 transition-opacity"></div>
-              <div className="relative bg-white rounded-2xl p-4 shadow-xl">
-                <img
-                  src={imagePreview}
-                  alt="Imagen analizada"
-                  className="w-full h-auto rounded-xl shadow-lg max-h-96 object-contain mx-auto"
-                />
+        {/* Columna derecha: Resultados */}
+        <div className="flex flex-col">
+          {/* Header con estado */}
+          <div 
+            className="rounded-t-xl p-4 mb-4"
+            style={{ backgroundColor: getResultColor() }}
+          >
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="text-4xl">{getResultEmoji()}</div>
+                <div>
+                  <h2 className="text-2xl font-bold text-white">
+                    {getResultText()}
+                  </h2>
+                  {normalizedStatus === 'completed' && (
+                    <p className="text-white/90 text-xs mt-1">
+                      Análisis completado
+                    </p>
+                  )}
+                </div>
+              </div>
+              <div className="bg-white/20 backdrop-blur-md rounded-full px-3 py-1">
+                <span className="text-white font-semibold text-xs">
+                  {normalizedStatus === 'completed' ? '✓ Listo' : '⏳ En proceso'}
+                </span>
               </div>
             </div>
-          )}
+          </div>
 
-          {/* Botón manual retry */}
-          {(normalizedStatus === 'pending' || normalizedStatus === 'processing') && onManualRetry && showManualRetry && (
-            <div className="mb-6">
-              <button
-                onClick={onManualRetry}
-                disabled={manualRetryLoading}
-                className="w-full px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl font-medium hover:from-blue-700 hover:to-indigo-700 focus:outline-none focus:ring-4 focus:ring-blue-300 disabled:opacity-50 disabled:cursor-not-allowed transition-all transform hover:scale-105 shadow-lg"
-              >
-                {manualRetryLoading ? '⏳ Obteniendo...' : '🔄 Pedir Resultados'}
-              </button>
-            </div>
-          )}
+          {/* Contenido de resultados */}
+          <div className="bg-white rounded-b-xl shadow-lg p-6" style={{ maxHeight: '520px', overflowY: 'auto' }}>
 
-          {/* Resultados completos */}
-          {normalizedStatus === 'completed' && (
-            <div className="space-y-6">
-              {/* Card de resultado principal */}
-              <div className={`bg-gradient-to-r ${isAI ? 'from-red-50 to-pink-50' : 'from-green-50 to-emerald-50'} rounded-xl p-6 border-2 ${isAI ? 'border-red-200' : 'border-green-200'}`}>
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center gap-3">
-                    <span className="text-4xl">{isAI ? '🤖' : '✨'}</span>
+            {/* Botón manual retry */}
+            {(normalizedStatus === 'pending' || normalizedStatus === 'processing') && onManualRetry && showManualRetry && (
+              <div className="mb-4">
+                <button
+                  onClick={onManualRetry}
+                  disabled={manualRetryLoading}
+                  className="w-full px-4 py-2 text-white rounded-lg font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-md"
+                  style={{ 
+                    backgroundColor: manualRetryLoading ? '#154d82' : '#071d32',
+                  }}
+                  onMouseEnter={(e) => !manualRetryLoading && (e.currentTarget.style.backgroundColor = '#154d82')}
+                  onMouseLeave={(e) => !manualRetryLoading && (e.currentTarget.style.backgroundColor = '#071d32')}
+                >
+                  {manualRetryLoading ? '⏳ Obteniendo...' : '🔄 Pedir Resultados'}
+                </button>
+              </div>
+            )}
+
+            {/* Resultados completos */}
+            {normalizedStatus === 'completed' && (
+              <div className="space-y-4">
+                {/* Card de resultado principal */}
+                <div 
+                  className="rounded-lg p-4 border-2"
+                  style={{ 
+                    backgroundColor: isAI ? '#fef2f2' : '#f0fdf4',
+                    borderColor: isAI ? '#fecaca' : '#bbf7d0'
+                  }}
+                >
+                  <div className="flex items-center gap-3 mb-3">
+                    <span className="text-3xl">{isAI ? '🤖' : '✨'}</span>
                     <div>
-                      <h3 className="text-2xl font-bold text-gray-800">
+                      <h3 className="text-xl font-bold text-gray-800">
                         {isAI ? 'Imagen Generada por IA' : 'Imagen Real'}
                       </h3>
-                      <p className="text-sm text-gray-600 mt-1">
+                      <p className="text-xs text-gray-600 mt-0.5">
                         {isAI ? 'Esta imagen fue creada artificialmente' : 'Esta es una imagen auténtica'}
                       </p>
                     </div>
                   </div>
+
+                  {/* Barra de confianza */}
+                  {confidenceValue > 0 && (
+                    <div className="mt-3">
+                      <div className="flex items-center justify-between mb-1.5">
+                        <span className="text-xs font-semibold text-gray-700">Nivel de Confianza</span>
+                        <span className={`text-base font-bold ${getConfidenceColor()}`}>
+                          {(confidenceValue * 100).toFixed(1)}%
+                        </span>
+                      </div>
+                      <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
+                        <div
+                          style={{ 
+                            width: `${confidenceValue * 100}%`,
+                            backgroundColor: isAI ? '#dc2626' : '#16a34a'
+                          }}
+                          className="h-full rounded-full transition-all duration-1000"
+                        ></div>
+                      </div>
+                    </div>
+                  )}
                 </div>
 
-                {/* Barra de confianza */}
-                {confidenceValue > 0 && (
-                  <div className="mt-4">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-sm font-semibold text-gray-700">Nivel de Confianza</span>
-                      <span className={`text-lg font-bold ${getConfidenceColor()}`}>
-                        {(confidenceValue * 100).toFixed(1)}%
-                      </span>
-                    </div>
-                    <div className="w-full bg-gray-200 rounded-full h-4 overflow-hidden">
-                      <div
-                        className={`h-full rounded-full transition-all duration-1000 ${
-                          isAI ? 'bg-gradient-to-r from-red-500 to-pink-500' : 'bg-gradient-to-r from-green-500 to-emerald-500'
-                        }`}
-                        style={{ width: `${confidenceValue * 100}%` }}
-                      ></div>
+                {/* Explicación */}
+                {results.explanation && (
+                  <div 
+                    className="rounded-lg p-4 border-2"
+                    style={{ 
+                      backgroundColor: '#f0f9ff',
+                      borderColor: '#154d82'
+                    }}
+                  >
+                    <div className="flex items-start gap-2">
+                      <span className="text-2xl">💡</span>
+                      <div className="flex-1">
+                        <h4 className="text-base font-bold text-gray-800 mb-1">Explicación del Análisis</h4>
+                        <p className="text-gray-700 text-sm leading-relaxed italic">
+                          "{results.explanation}"
+                        </p>
+                      </div>
                     </div>
                   </div>
                 )}
-              </div>
 
-              {/* Explicación */}
-              {results.explanation && (
-                <div className="bg-gradient-to-br from-purple-50 to-indigo-50 rounded-xl p-6 border-2 border-purple-200">
-                  <div className="flex items-start gap-3">
-                    <span className="text-3xl">💡</span>
-                    <div className="flex-1">
-                      <h4 className="text-lg font-bold text-gray-800 mb-2">Explicación del Análisis</h4>
-                      <p className="text-gray-700 leading-relaxed italic">
-                        "{results.explanation}"
-                      </p>
+                {/* Información adicional */}
+                <div className="grid grid-cols-2 gap-3 mt-4">
+                  {/* Provider */}
+                  {results.provider && (
+                    <div 
+                      className="rounded-lg p-3 border"
+                      style={{ 
+                        backgroundColor: '#f0f9ff',
+                        borderColor: '#154d82'
+                      }}
+                    >
+                      <div className="flex items-center gap-1.5 mb-1">
+                        <span className="text-xl">🔬</span>
+                        <span className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Proveedor</span>
+                      </div>
+                      <p className="text-gray-800 font-medium text-xs">{results.provider}</p>
                     </div>
-                  </div>
-                </div>
-              )}
+                  )}
 
-              {/* Información adicional */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* Provider */}
-                {results.provider && (
-                  <div className="bg-gradient-to-br from-blue-50 to-cyan-50 rounded-xl p-4 border border-blue-200">
-                    <div className="flex items-center gap-2 mb-2">
-                      <span className="text-2xl">🔬</span>
-                      <span className="text-sm font-semibold text-gray-600 uppercase tracking-wide">Proveedor</span>
+                  {/* Analysis ID */}
+                  {results.analysis_id && (
+                    <div 
+                      className="rounded-lg p-3 border"
+                      style={{ 
+                        backgroundColor: '#f8fafc',
+                        borderColor: '#cbd5e1'
+                      }}
+                    >
+                      <div className="flex items-center gap-1.5 mb-1">
+                        <span className="text-xl">🆔</span>
+                        <span className="text-xs font-semibold text-gray-600 uppercase tracking-wide">ID</span>
+                      </div>
+                      <p className="text-gray-800 font-mono text-xs break-all">{results.analysis_id}</p>
                     </div>
-                    <p className="text-gray-800 font-medium">{results.provider}</p>
-                  </div>
-                )}
+                  )}
 
-                {/* Analysis ID */}
-                {results.analysis_id && (
-                  <div className="bg-gradient-to-br from-gray-50 to-slate-50 rounded-xl p-4 border border-gray-200">
-                    <div className="flex items-center gap-2 mb-2">
-                      <span className="text-2xl">🆔</span>
-                      <span className="text-sm font-semibold text-gray-600 uppercase tracking-wide">ID de Análisis</span>
+                  {/* Fecha de creación */}
+                  {results.created_at && (
+                    <div 
+                      className="rounded-lg p-3 border"
+                      style={{ 
+                        backgroundColor: '#fffbeb',
+                        borderColor: '#fde68a'
+                      }}
+                    >
+                      <div className="flex items-center gap-1.5 mb-1">
+                        <span className="text-xl">📅</span>
+                        <span className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Creado</span>
+                      </div>
+                      <p className="text-gray-800 text-xs">{formatDate(results.created_at)}</p>
                     </div>
-                    <p className="text-gray-800 font-mono text-xs break-all">{results.analysis_id}</p>
-                  </div>
-                )}
+                  )}
 
-                {/* Fecha de creación */}
-                {results.created_at && (
-                  <div className="bg-gradient-to-br from-yellow-50 to-amber-50 rounded-xl p-4 border border-yellow-200">
-                    <div className="flex items-center gap-2 mb-2">
-                      <span className="text-2xl">📅</span>
-                      <span className="text-sm font-semibold text-gray-600 uppercase tracking-wide">Creado</span>
+                  {/* Fecha de actualización */}
+                  {results.updated_at && (
+                    <div 
+                      className="rounded-lg p-3 border"
+                      style={{ 
+                        backgroundColor: '#f0fdfa',
+                        borderColor: '#99f6e4'
+                      }}
+                    >
+                      <div className="flex items-center gap-1.5 mb-1">
+                        <span className="text-xl">🕒</span>
+                        <span className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Actualizado</span>
+                      </div>
+                      <p className="text-gray-800 text-xs">{formatDate(results.updated_at)}</p>
                     </div>
-                    <p className="text-gray-800 text-sm">{formatDate(results.created_at)}</p>
-                  </div>
-                )}
-
-                {/* Fecha de actualización */}
-                {results.updated_at && (
-                  <div className="bg-gradient-to-br from-teal-50 to-green-50 rounded-xl p-4 border border-teal-200">
-                    <div className="flex items-center gap-2 mb-2">
-                      <span className="text-2xl">🕒</span>
-                      <span className="text-sm font-semibold text-gray-600 uppercase tracking-wide">Actualizado</span>
-                    </div>
-                    <p className="text-gray-800 text-sm">{formatDate(results.updated_at)}</p>
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
-
-          {/* Spinner mientras procesa */}
-          {(normalizedStatus === 'processing' || normalizedStatus === 'pending') && !showManualRetry && (
-            <div className="text-center py-8">
-              <div className="inline-block relative">
-                <div className="animate-spin rounded-full h-16 w-16 border-4 border-blue-200 border-t-blue-600 mb-4"></div>
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <span className="text-2xl">🔍</span>
-                </div>
-              </div>
-              <p className="text-gray-700 font-medium text-lg">Analizando imagen...</p>
-              <p className="text-gray-500 text-sm mt-2">Esto puede tomar unos momentos</p>
-            </div>
-          )}
-
-          {/* Error */}
-          {normalizedStatus === 'failed' && (
-            <div className="bg-gradient-to-br from-red-50 to-orange-50 rounded-xl p-6 border-2 border-red-200">
-              <div className="flex items-center gap-3">
-                <span className="text-4xl">⚠️</span>
-                <div>
-                  <h3 className="text-xl font-bold text-red-800 mb-2">Error en el Análisis</h3>
-                  {results.message && (
-                    <p className="text-red-700">{results.message}</p>
                   )}
                 </div>
               </div>
-            </div>
-          )}
+            )}
 
-          {/* Mensaje adicional */}
-          {results.message && normalizedStatus !== 'failed' && normalizedStatus !== 'pending' && normalizedStatus !== 'processing' && (
-            <div className="mt-4 bg-blue-50 border border-blue-200 rounded-xl p-4">
-              <p className="text-blue-800 text-sm flex items-center gap-2">
-                <span>ℹ️</span>
-                {results.message}
-              </p>
-            </div>
-          )}
+            {/* Spinner mientras procesa */}
+            {(normalizedStatus === 'processing' || normalizedStatus === 'pending') && !showManualRetry && (
+              <div className="text-center py-6">
+                <div className="inline-block relative">
+                  <div 
+                    className="animate-spin rounded-full h-12 w-12 border-4 mb-3"
+                    style={{ 
+                      borderColor: '#154d8220',
+                      borderTopColor: '#154d82'
+                    }}
+                  ></div>
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <span className="text-xl">🔍</span>
+                  </div>
+                </div>
+                <p className="text-gray-700 font-medium">Analizando imagen...</p>
+                <p className="text-gray-500 text-xs mt-1">Esto puede tomar unos momentos</p>
+              </div>
+            )}
+
+            {/* Error */}
+            {normalizedStatus === 'failed' && (
+              <div 
+                className="rounded-lg p-4 border-2"
+                style={{ 
+                  backgroundColor: '#fef2f2',
+                  borderColor: '#fecaca'
+                }}
+              >
+                <div className="flex items-center gap-3">
+                  <span className="text-3xl">⚠️</span>
+                  <div>
+                    <h3 className="text-lg font-bold text-red-800 mb-1">Error en el Análisis</h3>
+                    {results.message && (
+                      <p className="text-red-700 text-sm">{results.message}</p>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Mensaje adicional */}
+            {results.message && normalizedStatus !== 'failed' && normalizedStatus !== 'pending' && normalizedStatus !== 'processing' && (
+              <div 
+                className="mt-4 rounded-lg p-3 border"
+                style={{ 
+                  backgroundColor: '#f0f9ff',
+                  borderColor: '#154d82'
+                }}
+              >
+                <p className="text-sm flex items-center gap-2" style={{ color: '#154d82' }}>
+                  <span>ℹ️</span>
+                  {results.message}
+                </p>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>

@@ -38,3 +38,8 @@ Icon?
 
 # Shell history (por si acaso)
 *.history
+
+# Node modules
+node_modules/
+**/node_modules/
+frontend/node_modules/

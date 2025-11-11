@@ -216,11 +216,11 @@ export default function ImageUpload() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-12 px-4">
+    <div className="min-h-screen py-12 px-4" style={{ backgroundColor: '#071d32' }}>
       <div className="max-w-4xl mx-auto">
         <div className="bg-white rounded-lg shadow-xl p-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-8 text-center">
-            Detección de Imágenes AI
+          <h1 className="text-3xl font-bold mb-8 text-center" style={{ color: '#071d32' }}>
+            Image Analyzer
           </h1>
 
           {error && (
@@ -236,7 +236,23 @@ export default function ImageUpload() {
           {/* PRIMERA PANTALLA: Subida de imagen - Solo se muestra cuando NO hay requestId */}
           {!requestId && (
             <div className="space-y-6">
-              <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-indigo-500 transition-colors">
+              <div className="border-2 border-dashed rounded-lg p-8 text-center transition-all duration-200" 
+                   style={{ 
+                     borderColor: preview ? '#154d82' : '#cbd5e1',
+                     backgroundColor: preview ? '#f8fafc' : 'transparent'
+                   }}
+                   onMouseEnter={(e) => {
+                     if (!preview) {
+                       e.currentTarget.style.borderColor = '#154d82';
+                       e.currentTarget.style.backgroundColor = '#f0f9ff';
+                     }
+                   }}
+                   onMouseLeave={(e) => {
+                     if (!preview) {
+                       e.currentTarget.style.borderColor = '#cbd5e1';
+                       e.currentTarget.style.backgroundColor = 'transparent';
+                     }
+                   }}>
                 <input
                   ref={fileInputRef}
                   type="file"
@@ -255,13 +271,14 @@ export default function ImageUpload() {
                       <img
                         src={preview}
                         alt="Preview"
-                        className="max-h-64 max-w-full rounded-lg shadow-md"
+                        className="max-h-64 max-w-full rounded-lg shadow-lg"
                       />
                     </div>
                   ) : (
                     <div className="mb-4">
                       <svg
-                        className="mx-auto h-12 w-12 text-gray-400"
+                        className="mx-auto h-16 w-16"
+                        style={{ color: '#154d82' }}
                         stroke="currentColor"
                         fill="none"
                         viewBox="0 0 48 48"
@@ -275,10 +292,10 @@ export default function ImageUpload() {
                       </svg>
                     </div>
                   )}
-                  <span className="text-indigo-600 font-medium">
+                  <span className="font-medium text-lg" style={{ color: '#154d82' }}>
                     {preview ? 'Cambiar imagen' : 'Selecciona una imagen'}
                   </span>
-                  <span className="text-sm text-gray-500 mt-2">
+                  <span className="text-sm mt-2" style={{ color: '#64748b' }}>
                     PNG, JPG, GIF hasta 10MB
                   </span>
                 </label>
@@ -289,14 +306,29 @@ export default function ImageUpload() {
                   <button
                     onClick={handleUpload}
                     disabled={uploading}
-                    className="px-6 py-3 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    className="px-8 py-3 text-white rounded-lg font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all transform hover:scale-105 shadow-lg"
+                    style={{ 
+                      backgroundColor: uploading ? '#154d82' : '#071d32',
+                    }}
+                    onMouseEnter={(e) => !uploading && (e.currentTarget.style.backgroundColor = '#154d82')}
+                    onMouseLeave={(e) => !uploading && (e.currentTarget.style.backgroundColor = '#071d32')}
                   >
                     {uploading ? 'Subiendo...' : 'Analizar Imagen'}
                   </button>
                   {!uploading && (
                     <button
                       onClick={handleReset}
-                      className="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg font-medium hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors"
+                      className="px-6 py-3 rounded-lg font-medium focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors"
+                      style={{ 
+                        backgroundColor: '#e2e8f0',
+                        color: '#475569'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.backgroundColor = '#cbd5e1';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.backgroundColor = '#e2e8f0';
+                      }}
                     >
                       Limpiar
                     </button>
@@ -333,7 +365,17 @@ export default function ImageUpload() {
               <div className="mt-4 flex justify-center">
                 <button
                   onClick={handleReset}
-                  className="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg font-medium hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors"
+                  className="px-8 py-3 rounded-lg font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 transition-all transform hover:scale-105 shadow-lg"
+                  style={{ 
+                    backgroundColor: '#071d32',
+                    color: 'white'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = '#154d82';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = '#071d32';
+                  }}
                 >
                   Analizar Otra Imagen
                 </button>

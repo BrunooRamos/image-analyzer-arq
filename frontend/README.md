@@ -1,4 +1,4 @@
-# AI Image Detector - Frontend
+# Image Analyzer - Frontend
 
 Frontend para un sistema de detección de imágenes generadas por IA, desarrollado con React, TypeScript y AWS Amplify.
 

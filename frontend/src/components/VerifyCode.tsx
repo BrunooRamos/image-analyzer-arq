@@ -61,7 +61,7 @@ export default function VerifyCode() {
 
   if (success) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 px-4">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-white px-4">
         <div className="max-w-md w-full bg-white rounded-lg shadow-xl p-8">
           <div className="text-center">
             <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100 mb-4">
@@ -90,7 +90,7 @@ export default function VerifyCode() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 px-4">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-white px-4">
       <div className="max-w-md w-full bg-white rounded-lg shadow-xl p-8">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Verificar Email</h1>
@@ -120,7 +120,7 @@ export default function VerifyCode() {
               onChange={handleCodeChange}
               required
               maxLength={6}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-center text-2xl font-mono tracking-widest"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-secondary focus:border-transparent text-center text-2xl font-mono tracking-widest"
               placeholder="000000"
               autoComplete="off"
             />
@@ -132,7 +132,7 @@ export default function VerifyCode() {
           <button
             type="submit"
             disabled={loading || code.length !== 6}
-            className="w-full bg-indigo-600 text-white py-2 px-4 rounded-lg font-medium hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="w-full bg-primary text-white py-2 px-4 rounded-lg font-medium hover:bg-secondary focus:outline-none focus:ring-2 focus:ring-secondary focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             {loading ? 'Verificando...' : 'Verificar Código'}
           </button>
@@ -143,14 +143,14 @@ export default function VerifyCode() {
             ¿No recibiste el código?{' '}
             <button
               onClick={() => navigate('/register')}
-              className="text-indigo-600 hover:text-indigo-500 font-medium"
+              className="text-secondary hover:text-primary font-medium"
             >
               Volver al registro
             </button>
           </p>
           <p className="mt-4 text-sm text-gray-600">
             ¿Ya tienes una cuenta?{' '}
-            <Link to="/login" className="text-indigo-600 hover:text-indigo-500 font-medium">
+            <Link to="/login" className="text-secondary hover:text-primary font-medium">
               Inicia sesión aquí
             </Link>
           </p>
