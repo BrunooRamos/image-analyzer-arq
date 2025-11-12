@@ -28,7 +28,7 @@ export default function Layout({ children }: LayoutProps) {
                   onMouseEnter={(e) => e.currentTarget.style.color = '#154d82'}
                   onMouseLeave={(e) => e.currentTarget.style.color = '#071d32'}
                 >
-                  Image Analyzer 
+                  Image Analyzer Peñarol  
                 </Link>
               </div>
               <div className="flex items-center gap-4">
